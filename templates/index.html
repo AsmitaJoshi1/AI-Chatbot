@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+
+    <style>
+      
+     * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.chat-container {
+    width: 90%;
+    max-width: 800px;
+    height: 85vh;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.header {
+    background: #222;
+    color: white;
+    padding: 18px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+#chat-box {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.message {
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    max-width: 85%;
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+.message.user {
+    background: #dbeafe;
+    margin-left: auto;
+}
+
+.message.ai {
+    background: #eeeeee;
+    margin-right: auto;
+}
+
+.message.ai h1,
+.message.ai h2,
+.message.ai h3 {
+    margin: 10px 0;
+}
+
+.message.ai p {
+    margin: 8px 0;
+}
+
+.message.ai ul,
+.message.ai ol {
+    margin: 8px 0 8px 25px;
+}
+
+.message.ai table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    display: block;
+    overflow-x: auto;
+}
+
+.message.ai th,
+.message.ai td {
+    border: 1px solid #bbb;
+    padding: 8px 10px;
+    text-align: left;
+    min-width: 120px;
+}
+
+.message.ai th {
+    background: #ddd;
+}
+
+.input-area {
+    display: flex;
+    padding: 15px;
+    border-top: 1px solid #ddd;
+    gap: 10px;
+    background: white;
+    flex-shrink: 0;
+}
+
+#user-input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #aaa;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+}
+
+#user-input:focus {
+    border-color: #222;
+}
+
+button {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 8px;
+    background: #222;
+    color: white;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+button:hover {
+    background: #444;
+} 
+            
+    </style>
+</head>
+
+<body>
+
+    <div class="chat-container">
+
+        <div class="header">
+            🤖 AI Chatbot
+        </div>
+
+        <div id="chat-box">
+            <div class="message ai">
+                Hello! How can I help you?
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input
+                type="text"
+                id="user-input"
+                placeholder="Type your message..."
+            >
+
+            <button onclick="sendMessage()">
+                Send
+            </button>
+        </div>
+
+    </div>
+
+
+    <script>
+
+        async function sendMessage() {
+
+            const input = document.getElementById("user-input");
+            const message = input.value.trim();
+
+            if (message === "") {
+                return;
+            }
+
+            const chatBox = document.getElementById("chat-box");
+
+            // Display user's message
+            chatBox.innerHTML += `
+                <div class="message user">
+                    <strong>You:</strong> ${message}
+                </div>
+            `;
+
+            input.value = "";
+
+            // Send message to Flask
+            try {
+
+                const response = await fetch("/chat", {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        user_message: message
+                    })
+                });
+
+                const data = await response.json();
+
+                // Display AI response
+                chatBox.innerHTML += `
+                    <div class="message ai">
+                        <strong>AI:</strong> ${data.response}
+                    </div>
+                `;
+
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+            } catch (error) {
+
+               chatBox.innerHTML += `
+    <div class="message ai">
+        <strong>AI:</strong>
+        <div>${data.response}</div>
+    </div>
+`;
+
+                console.error(error);
+            }
+        }
+
+
+        // Allow Enter key to send message
+        document.getElementById("user-input").addEventListener("keypress", function(event) {
+
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+
+        });
+
+    </script>
+
+</body>
+</html>
